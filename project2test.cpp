@@ -206,7 +206,12 @@ int main()
     double sum_dist_mean_event_time_squared{accumulate(dist_mean_event_time_squared.begin(), dist_mean_event_time_squared.end(), 0)};
     double r_growth_rate{sum_multiply_dist_incidence_event_time / sum_dist_mean_event_time_squared};
 
-    cout << "The growth rate of this simulated epidemic is " << r_growth_rate << endl;
+    cout << "The growth rate of this simulated epidemic is " << r_growth_rate << " per day." << endl;
+
+    double doubling_time{log(2) / log(1 + r_growth_rate / 100)};
+
+    cout << "The doubling time of this simulated epidemic is " << doubling_time << " days." << endl;
+
     cout << "Time taken: " << (double)(clock() - tStart) / CLOCKS_PER_SEC << "s" << endl;
     return 0;
 }
