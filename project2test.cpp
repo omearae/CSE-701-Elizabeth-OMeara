@@ -5,6 +5,7 @@
 #include <iomanip>
 #include <algorithm>
 #include <numeric>
+#include <ctime>
 
 using namespace std;
 class size_must_match
@@ -60,9 +61,10 @@ vector<double> operator-(const vector<double> &v, const double &w)
 
 int main()
 {
+    clock_t tStart = clock();
     int i;
     const double N{5000000};
-    const int M{50000};
+    const int M{500000};
     vector<double> susceptible(M);
     vector<double> infectious(M);
     vector<double> recovered(M);
@@ -205,4 +207,6 @@ int main()
     double r_growth_rate{sum_multiply_dist_incidence_event_time / sum_dist_mean_event_time_squared};
 
     cout << "The growth rate of this simulated epidemic is " << r_growth_rate << endl;
+    cout << "Time taken: " << (double)(clock() - tStart) / CLOCKS_PER_SEC << "s" << endl;
+    return 0;
 }
