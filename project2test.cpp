@@ -2,16 +2,71 @@
 #include <cmath>
 #include <vector>
 #include <random>
+#include <iomanip>
+#include <algorithm>
+#include <numeric>
+
 using namespace std;
+class size_must_match
+{
+};
+ostream &operator<<(ostream &out, const vector<double> &v)
+{
+    size_t s{v.size() - 1};
+    out << "(";
+    for (size_t i{0}; i < s; i++)
+        out << v[i] << ", ";
+    out << v[s] << ")\n";
+    return out;
+}
+vector<double> operator*(const vector<double> &v, const vector<double> &w)
+{
+    size_t s{v.size()};
+    vector<double> u(s, 0);
+    if (s != w.size())
+        throw size_must_match{};
+    for (size_t i{0}; i < s; i++)
+        u[i] += v[i] * w[i];
+    return u;
+}
+vector<double> operator+(const vector<double> &v, const vector<double> &w)
+{
+    size_t s{v.size()};
+    vector<double> u(s, 0);
+    if (s != w.size())
+        throw size_must_match{};
+    for (size_t i{0}; i < s; i++)
+        u[i] = v[i] + w[i];
+    return u;
+}
+vector<double> operator-(const vector<double> &v, const vector<double> &w)
+{
+    size_t s{v.size()};
+    vector<double> u(s, 0);
+    if (s != w.size())
+        throw size_must_match{};
+    for (size_t i{0}; i < s; i++)
+        u[i] = v[i] - w[i];
+    return u;
+}
+vector<double> operator-(const vector<double> &v, const double &w)
+{
+    size_t s{v.size()};
+    vector<double> u(s, 0);
+    for (size_t i{0}; i < s; i++)
+        u[i] = v[i] - w;
+    return u;
+}
+
 int main()
 {
     int i;
-    const double N{50000};
+    const double N{5000000};
     const int M{50000};
-    vector<double> susceptible[M];
-    vector<double> infectious[M];
-    vector<double> recovered[M];
-    vector<double> event_time[M];
+    vector<double> susceptible(M);
+    vector<double> infectious(M);
+    vector<double> recovered(M);
+    vector<double> event_time(M);
     double t_0{0};
     double I_0{20};
     double R_0{0};
@@ -95,4 +150,59 @@ int main()
             recovered[i + 1] = E_6[2];
         }
     }
+    vector<double> log_incidence(M);
+    for (i = 0; i < M - 1; i++)
+    {
+        log_incidence[i] = log(infectious[i]);
+    }
+    double max_log_incidence = *max_element(log_incidence.begin(), log_incidence.end());
+    int max_location;
+    for (i = 0; i < M - 1; i++)
+    {
+        if (log_incidence[i] == max_log_incidence)
+        {
+            max_location = i;
+            break;
+        }
+    }
+    double min_log_incidence = *min_element(log_incidence.begin(), log_incidence.end());
+    int min_location;
+    for (i = 0; i < M - 1; i++)
+    {
+        if (log_incidence[i] == min_log_incidence)
+        {
+            min_location = i;
+            break;
+        }
+    }
+    vector<double> least_square_data_incidence(max_location);
+    for (i = 0; i < max_location - 1; i++)
+    {
+        least_square_data_incidence[i] = log_incidence[i];
+    }
+    vector<double> least_square_data_event_time(max_location);
+    for (i = 0; i < max_location - 1; i++)
+    {
+        least_square_data_event_time[i] = event_time[i];
+    }
+    double sum_least_square_data_incidence{accumulate(least_square_data_incidence.begin(), least_square_data_incidence.end(), 0)};
+    double sum_least_square_data_event_time{accumulate(least_square_data_event_time.begin(), least_square_data_event_time.end(), 0)};
+    double mean_least_square_data_incidence{sum_least_square_data_incidence / max_location};
+    double mean_least_square_data_event_time{sum_least_square_data_event_time / max_location};
+
+    vector<double> dist_mean_incidence(max_location);
+    vector<double> dist_mean_event_time(max_location);
+    vector<double> dist_mean_event_time_squared(max_location);
+    vector<double> multiply_dist_incidence_event_time(max_location);
+
+    dist_mean_incidence = least_square_data_incidence - mean_least_square_data_incidence;
+    dist_mean_event_time = least_square_data_event_time - mean_least_square_data_event_time;
+    dist_mean_event_time_squared = dist_mean_event_time * dist_mean_event_time;
+    multiply_dist_incidence_event_time = dist_mean_event_time * dist_mean_incidence;
+
+    double sum_multiply_dist_incidence_event_time{accumulate(multiply_dist_incidence_event_time.begin(), multiply_dist_incidence_event_time.end(), 0)};
+    double sum_dist_mean_event_time_squared{accumulate(dist_mean_event_time_squared.begin(), dist_mean_event_time_squared.end(), 0)};
+    double r_growth_rate{sum_multiply_dist_incidence_event_time / sum_dist_mean_event_time_squared};
+
+    cout << "The growth rate of this simulated epidemic is " << r_growth_rate << endl;
 }
