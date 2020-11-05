@@ -72,29 +72,29 @@ int main()
     /* Initializing a vector of R_0 values to iterate through in order to compare outputs for different values of R_0*/
     vector<double> reproduction_number{2.7, 4, 12};
 
-    cout << setw(30)
+    cout << setw(40)
          << "SIR Model"
-         << setw(30)
+         << setw(40)
          << "SEIR Model"
          << endl;
     cout << "| "
          << setw(10)
          << "R_0"
          << " | "
-         << setw(10)
-         << "r"
+         << setw(20)
+         << "r (cases per day)"
          << " | "
          << setw(10)
-         << "Td"
+         << "Td (days)"
          << " | "
          << setw(10)
          << "R_0"
          << " | "
-         << setw(10)
-         << "r"
+         << setw(20)
+         << "r (cases per day)"
          << " | "
          << setw(10)
-         << "Td"
+         << "Td (days)"
          << " |" << endl;
 
     /* For loop that runs the below code for each value of R_0 in the above vector*/
@@ -454,7 +454,7 @@ int main()
              << setw(10)
              << reproduction_number[j]
              << " | "
-             << setw(10)
+             << setw(20)
              << r_growth_rate
              << " | "
              << setw(10)
@@ -463,7 +463,7 @@ int main()
              << setw(10)
              << reproduction_number[j]
              << " | "
-             << setw(10)
+             << setw(20)
              << r_growth_rate_SEIR
              << " | "
              << setw(10)
