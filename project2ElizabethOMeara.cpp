@@ -7,7 +7,10 @@
 #include <numeric>
 #include <ctime>
 
+/* Setting the namespace to the standard namespace std*/
 using namespace std;
+
+/* Defining operator overloads which will be used in the program*/
 class size_must_match
 {
 };
@@ -61,9 +64,14 @@ vector<double> operator-(const vector<double> &v, const double &w)
 
 int main()
 {
+    /* Initializing the start time of the program in order to output the run time of the program*/
     clock_t tStart = clock();
+
     int j;
+
+    /* Initializing a vector of R_0 values to iterate through in order to compare outputs for different values of R_0*/
     vector<double> reproduction_number{2.7, 4, 12};
+
     cout << setw(30)
          << "SIR Model"
          << setw(30)
@@ -88,11 +96,17 @@ int main()
          << setw(10)
          << "Td"
          << " |" << endl;
+
+    /* For loop that runs the below code for each value of R_0 in the above vector*/
     for (j = 0; j < 3; j++)
     {
+        /* Initializing variables, vectors and constants to be used throughout the code*/
         int i;
+
+        /* Population size N and number of Iterations M*/
         const double N{5000000};
         const int M{500000};
+
         vector<double> susceptible_SIR(M);
         vector<double> infectious_SIR(M);
         vector<double> recovered_SIR(M);
@@ -111,6 +125,8 @@ int main()
         double mu{0.02 / 365};
         double gamma{0.25};
         double sigma{0.25};
+
+        /* Assigning the defined initial values to the first element of the corresponding vector*/
         susceptible_SIR.assign(1, S_0_SIR);
         infectious_SIR.assign(1, I_0);
         recovered_SIR.assign(1, R_0);
@@ -120,6 +136,8 @@ int main()
         infectious_SEIR.assign(1, I_0);
         recovered_SEIR.assign(1, R_0);
         event_time_SEIR.assign(1, t_0);
+
+        /* Using the Gillespie Algorithm to obtain epidemic data for the SIR and SEIR models*/
         for (i = 0; i < M - 1; i++)
         {
             double S_SIR{susceptible_SIR[i]};
@@ -131,6 +149,7 @@ int main()
             double I_SEIR{infectious_SEIR[i]};
             double R_SEIR{recovered_SEIR[i]};
 
+            /* Event rates a_i for the SIR model and b_i for the SEIR model*/
             double a_1{N * mu};
             double a_2{reproduction_number[j] * (gamma + mu) * S_SIR * I_SIR / N};
             double a_3{gamma * I_SIR};
@@ -150,6 +169,7 @@ int main()
             double a_0{a_1 + a_2 + a_3 + a_4 + a_5 + a_6};
             double b_0{b_1 + b_2 + b_3 + b_4 + b_5 + b_6 + b_7 + b_8};
 
+            /* Vectors of events E_i corresponding to a_i and E_i_SEIR corresponding to b_i*/
             vector<double> E_1{S_SIR + 1, I_SIR, R_SIR};
             vector<double> E_2{S_SIR - 1, I_SIR + 1, R_SIR};
             vector<double> E_3{S_SIR, I_SIR - 1, R_SIR + 1};
@@ -166,19 +186,24 @@ int main()
             vector<double> E_7_SEIR{S_SEIR, E_SEIR, I_SEIR - 1, R_SEIR};
             vector<double> E_8_SEIR{S_SEIR, E_SEIR, I_SEIR, R_SEIR - 1};
 
+            /* Generating Uniform Deviate within (0, 1)*/
             random_device rd;
             mt19937 gen(rd());
             uniform_real_distribution<> dis(0.0, 1.0);
             double u{dis(gen)};
+
+            /* Calculating time until next event tnew*/
             double t{event_time_SIR[i]};
             double dt{(1 / a_0) * log(1 / (1 - u))};
             double tnew{t + dt};
 
+            /* Generating Uniform Deviate within (0, a_0) for SIR Model*/
             random_device rd1;
             mt19937 gen1(rd1());
             uniform_real_distribution<> dis1(0.0, a_0);
             double v{dis1(gen1)};
 
+            /* Determining the event occuring at time tnew for SIR Model*/
             if (0 <= v && v < a_1)
             {
                 event_time_SIR[i + 1] = tnew;
@@ -221,11 +246,14 @@ int main()
                 infectious_SIR[i + 1] = E_6[1];
                 recovered_SIR[i + 1] = E_6[2];
             }
+
+            /* Generating Uniform Deviate within (0, b_0) for SEIR model*/
             random_device rd2;
             mt19937 gen2(rd2());
             uniform_real_distribution<> dis2(0.0, b_0);
             double v2{dis2(gen2)};
 
+            /* Determining the event occuring at time tnew for SEIR model*/
             if (0 <= v2 && v2 < b_1)
             {
                 event_time_SEIR[i + 1] = tnew;
@@ -292,6 +320,7 @@ int main()
             }
         }
 
+        /* Initializing vectors for log incidence*/
         vector<double> log_incidence(M);
         vector<double> log_incidence_SEIR(M);
 
@@ -300,6 +329,8 @@ int main()
             log_incidence[i] = log(infectious_SIR[i]);
             log_incidence_SEIR[i] = log(infectious_SEIR[i]);
         }
+
+        /* Finding the max of log incidence and the index where it occurs for the SIR and SEIR models*/
         double max_log_incidence = *max_element(log_incidence.begin(), log_incidence.end());
         double max_log_incidence_SEIR = *max_element(log_incidence_SEIR.begin(), log_incidence_SEIR.end());
 
@@ -323,6 +354,7 @@ int main()
             }
         }
 
+        /* Finding the min of log incidence and the index where it occurs for the SIR and SEIR models*/
         double min_log_incidence = *min_element(log_incidence.begin(), log_incidence.end());
         double min_log_incidence_SEIR = *min_element(log_incidence_SEIR.begin(), log_incidence_SEIR.end());
         int min_location;
@@ -344,6 +376,8 @@ int main()
                 break;
             }
         }
+
+        /* Initializing vectors containing data to be used in the least squares method*/
         vector<double> least_square_data_incidence(max_location);
         for (i = 0; i < max_location - 1; i++)
         {
@@ -368,6 +402,8 @@ int main()
             least_square_data_event_time_SEIR[i] = event_time_SEIR[i];
         }
 
+        /* Least Squares method of fitting a line to the above data*/
+        /* Finding the mean of the event time and log incidence data*/
         double sum_least_square_data_incidence{accumulate(least_square_data_incidence.begin(), least_square_data_incidence.end(), 0)};
         double sum_least_square_data_event_time_SIR{accumulate(least_square_data_event_time_SIR.begin(), least_square_data_event_time_SIR.end(), 0)};
         double mean_least_square_data_incidence{sum_least_square_data_incidence / max_location};
@@ -378,6 +414,7 @@ int main()
         double mean_least_square_data_incidence_SEIR{sum_least_square_data_incidence_SEIR / max_location_SEIR};
         double mean_least_square_data_event_time_SEIR{sum_least_square_data_event_time_SEIR / max_location_SEIR};
 
+        /* Initializing the vectors used in the calculation of r for the SIR and SEIR models*/
         vector<double> dist_mean_incidence(max_location);
         vector<double> dist_mean_event_time_SIR(max_location);
         vector<double> dist_mean_event_time_SIR_squared(max_location);
@@ -388,6 +425,7 @@ int main()
         vector<double> dist_mean_event_time_SEIR_squared(max_location_SEIR);
         vector<double> multiply_dist_incidence_event_time_SEIR(max_location_SEIR);
 
+        /* Using the least squares method to calculate the slope (r) of the fitted line for the SIR and SEIR models*/
         dist_mean_incidence = least_square_data_incidence - mean_least_square_data_incidence;
         dist_mean_event_time_SIR = least_square_data_event_time_SIR - mean_least_square_data_event_time_SIR;
         dist_mean_event_time_SIR_squared = dist_mean_event_time_SIR * dist_mean_event_time_SIR;
@@ -405,13 +443,13 @@ int main()
         double sum_dist_mean_event_time_SEIR_squared{accumulate(dist_mean_event_time_SEIR_squared.begin(), dist_mean_event_time_SEIR_squared.end(), 0)};
 
         double r_growth_rate{sum_multiply_dist_incidence_event_time_SIR / sum_dist_mean_event_time_SIR_squared};
-
-        double doubling_time{log(2) / log(1 + r_growth_rate / 100)};
-
         double r_growth_rate_SEIR{sum_multiply_dist_incidence_event_time_SEIR / sum_dist_mean_event_time_SEIR_squared};
 
+        /* Using the doubling time formula to calculate Td*/
+        double doubling_time{log(2) / log(1 + r_growth_rate / 100)};
         double doubling_time_SEIR{log(2) / log(1 + r_growth_rate_SEIR / 100)};
 
+        /* Outputting the values of R_0, r and Td to the terminal*/
         cout << "| "
              << setw(10)
              << reproduction_number[j]
@@ -433,6 +471,7 @@ int main()
              << " |" << endl;
     }
 
+    /* Outputting the run time to the terminal*/
     cout << "Time taken: " << (double)(clock() - tStart) / CLOCKS_PER_SEC << "s" << endl;
     return 0;
 }
