@@ -2,7 +2,7 @@
 
 ## Summary
 
-I created this program to simulate an epidemic and estimate the values of r and Td from the simulated data. The program uses the Gillespie Algorithm to simulate epidemic data using two models, the SIR model and the SEIR model. By inputting values for the population size, number of iterations, inital values of each compartment (S, E, I, R), gamma (where 1/gamma is the mean infectious period), sigma (where 1/sigma is the mean latent period), and birth/death rate, and the reproduction number R_0, the data is generated separately for the SIR and SEIR models. The growth rate r is then estimated as the slope of the initial growth phase of the log of the incidence data. Thus, the least squares method was used to fit a line to the corresponding data, where its slope = r. Once r is estimated, Td is calculated using the doubling time formula. The output of this program is a table comparing estimates of r and Td for the SIR and SEIR models for different values of R_0.
+I created this program to simulate an epidemic and estimate the values of r (growth rate) and Td (doubling time) from the simulated data. The program uses the Gillespie Algorithm to simulate epidemic data using two models, the SIR model and the SEIR model. By inputting values for the population size, number of iterations, inital values of each compartment (S, E, I, R), gamma (where 1/gamma is the mean infectious period), sigma (where 1/sigma is the mean latent period), birth/death rate, and the reproduction number R_0, the data is generated separately for the SIR and SEIR models. The growth rate r is then estimated as the slope of the initial growth phase of the log of the incidence data. Thus, the least squares method was used to fit a line to the corresponding data, where its slope = r. Once r is estimated, Td is calculated using the doubling time formula. The output of this program is a table comparing estimates of r and Td for the SIR and SEIR models for different values of R_0.
 
 ## Implementation
 
@@ -39,7 +39,7 @@ Before running the Gillespie Algorithm, the constants and vectors used in the co
 ` vector<double> exposed_SEIR(M); `\
 ` vector<double> infectious_SEIR(M); `\
 ` vector<double> recovered_SEIR(M); `\
-` vector<double> event_time_SEIR(M); `
+` vector<double> event_time_SEIR(M); `\
 ` double t_0{0}; `\
 ` double I_0{20}; `\
 ` double R_0{0}; `\
@@ -50,7 +50,7 @@ Before running the Gillespie Algorithm, the constants and vectors used in the co
 ` double gamma{0.25}; `\
 ` double sigma{0.25}; `
 
-Next we assign the initial values of each compartment to the first element of its corresponding class vector. A sample is shown below.
+Next, we assign the initial values of each compartment to the first element of its corresponding class vector. A sample is shown below.
 
 ` susceptible_SIR.assign(1, S_0_SIR); `
 
@@ -58,7 +58,7 @@ Now that we have the constants and vectors required for the Gillespie Algorithm 
 
 #### SIR Model
 
-First we initialize `S_SIR`, `I_SIR` and `R_SIR`, and let them equal each element of their corresponing vectors. An example of this is shown below.
+First, we initialize `S_SIR`, `I_SIR` and `R_SIR`, and let them equal each element of their corresponding vectors. An example of this is shown below.
 
 ` double S_SIR{susceptible_SIR[i]}; `
 
@@ -91,7 +91,7 @@ This uniform deviate `u` is then used to calculate `tnew` in the following way.
 ` double dt{(1 / a_0) * log(1 / (1 - u))}; `\
 ` double tnew{t + dt}; `
 
-Next, to determine which event (`E_i`) occurs at `tnew`, a different uniform deviate between (0, a_0) needs to be generated. This can be seen below.
+Next, to determine which event (`E_i`) occurs at `tnew`, a different uniform deviate between (0, `a_0`) needs to be generated. This can be seen below.
 
 ` random_device rd1; `\
 ` mt19937 gen1(rd1()); `\
@@ -143,11 +143,11 @@ The last step in the code within the for loop is to determine the event (`E_i`) 
 ` recovered_SIR[i + 1] = E_6[2]; `\
 ` } `
 
-After iterating the above code for the specified number of time steps (`M`), simulated epidemic data is successfully genereated.
+After iterating the above code for the specified number of time steps (`M`), simulated epidemic data is successfully generated.
 
 #### SEIR
 
-The methods used above in the SIR model are the same methods used for the SEIR model, except with the SEIR vectors, event rates, event vectors and uniform deviate between (0, b_0), where b_0 is the sum of the SEIR event rates.
+The methods used above in the SIR model are the same methods used for the SEIR model, except with the SEIR vectors, event rates, event vectors and uniform deviate, `v2`, between (0, `b_0`), where `b_0` is the sum of the SEIR event rates.
 
 ### Determining the fitting window for the Least Squares Method
 
@@ -200,7 +200,7 @@ Now that the the fitting window is known, new vectors containing only the data r
 ` least_square_data_event_time_SIR[i] = event_time_SIR[i]; `\
 ` } `
 
-Lastly, the least squares method is used to estimate the growth rate r. An example of this is shown for the SIR model, however the same method is used for the SEIR model except with the corresponding SEIR vectors.
+Lastly, the least squares method is used to estimate the growth rate `r`. An example of this is shown for the SIR model, however the same method is used for the SEIR model except with the corresponding SEIR vectors.
 
 ` double sum_least_square_data_incidence{accumulate(least_square_data_incidence.begin(), least_square_data_incidence.end(), 0)}; `\
 ` double sum_least_square_data_event_time_SIR{accumulate(least_square_data_event_time_SIR.begin(), least_square_data_event_time_SIR.end(), 0)}; `\
