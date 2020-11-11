@@ -8,7 +8,11 @@
                 "-g",
                 "${file}",
                 "-o",
-                "${fileDirname}\\${fileBasenameNoExtension}.exe"
+                "${fileDirname}\\${fileBasenameNoExtension}.exe",
+                "-Wall",
+                "-Wextra",
+                "-Wpedantic",
+                "-std=c++17"
             ],
             "options": {
                 "cwd": "C:\\msys64\\mingw64\\bin"
