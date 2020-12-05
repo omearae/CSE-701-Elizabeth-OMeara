@@ -14,11 +14,9 @@ int main()
 
     read_report reports("data.txt");
 
-    vector<int> dataList{reports.getData()};
+    vector<double> dataList{reports.getData()};
 
     read_population pop("population.txt");
-
-    int N{pop.getData()};
 
     return 0;
 }
