@@ -154,6 +154,22 @@ public:
     }
     vector<double> getSolve();
 
+    class param_non_positive
+    {
+    };
+
+    class no_epidemic
+    {
+    };
+
+    class not_in_R0_range
+    {
+    };
+
+    class not_in_gamma_range
+    {
+    };
+
 private:
     double N, I0, reproductionnumber, gamma;
     int totaltime;
@@ -161,6 +177,41 @@ private:
 
 vector<double> solve_SIR::getSolve()
 {
+    if (N <= 0)
+    {
+        throw param_non_positive{};
+    }
+
+    if (I0 <= 0)
+    {
+        throw param_non_positive{};
+    }
+
+    if (reproductionnumber <= 1)
+    {
+        throw no_epidemic{};
+    }
+
+    if (reproductionnumber > 6.5)
+    {
+        throw not_in_R0_range{};
+    }
+
+    if (gamma <= 0)
+    {
+        throw param_non_positive{};
+    }
+
+    if (gamma < 0.05)
+    {
+        throw not_in_gamma_range{};
+    }
+
+    if (gamma > 1)
+    {
+        throw not_in_gamma_range{};
+    }
+
     vector<double> Snew(totaltime), Inew(totaltime), Rnew(totaltime);
     Snew[0] = N - I0;
     Inew[0] = I0;

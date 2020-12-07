@@ -6,6 +6,7 @@
 #include <algorithm>
 #include <numeric>
 #include <ctime>
+#include <cmath>
 #include "final_project.hpp"
 
 //g++ final_project.cpp -Wall -Wextra -Wpedantic use to check for errors
@@ -14,21 +15,39 @@ using namespace std;
 int main()
 {
     clock_t tStart = clock();
-
     /* First we check to make sure the fitting mechanism works by fitting to simulated data where we know the parameters */
-    /* Here I use the class read_report to retrieve parameters from a .txt file. These are then used to simulate an epidemic
-    using the class solve_SIR with the given parameters. */
-    read_report parameter_test("params.txt");
-    vector<double> params_test{parameter_test.getData()};
-    solve_SIR test_solve(params_test[0], params_test[1], params_test[2], params_test[3], params_test[4]);
-    vector<double> reports_test{test_solve.getSolve()};
+    try
+    {
+        /* Here I use the class read_report to retrieve parameters from a .txt file. These are then used to simulate an epidemic
+        using the class solve_SIR with the given parameters. */
+        read_report parameter_test("params.txt");
+        vector<double> params_test{parameter_test.getData()};
+        solve_SIR test_solve(params_test[0], params_test[1], params_test[2], params_test[3], params_test[4]);
+        vector<double> reports_test{test_solve.getSolve()};
 
-    /* With this data we attempt to fit an SIR curve and output the fitted parameters */
-    fit_param test_fit(reports_test, params_test[0], params_test[4]);
-    vector<double> fitted_params_test{test_fit.getParam()};
+        /* With this data we attempt to fit an SIR curve and output the fitted parameters */
+        fit_param test_fit(reports_test, params_test[0], params_test[4]);
+        vector<double> fitted_params_test{test_fit.getParam()};
 
-    cout << "The initial parameters are: R_0 = " << params_test[2] << " and gamma = " << params_test[3] << endl;
-    cout << "The fitted parameters are: R_0 = " << fitted_params_test[0] << " and gamma = " << fitted_params_test[1] << endl;
+        cout << "The initial parameters are: R_0 = " << params_test[2] << " and gamma = " << params_test[3] << endl;
+        cout << "The fitted parameters are: R_0 = " << fitted_params_test[0] << " and gamma = " << fitted_params_test[1] << endl;
+    }
+    catch (const solve_SIR::param_non_positive &e)
+    {
+        cout << "Error: Parameter inputs have one or more negative values." << endl;
+    }
+    catch (const solve_SIR::no_epidemic &e)
+    {
+        cout << "Error: R0 input will result in no epidemic." << endl;
+    }
+    catch (const solve_SIR::not_in_R0_range &e)
+    {
+        cout << "Error: R0 input is not in the range of R0 used in the fitting mechanism." << endl;
+    }
+    catch (const solve_SIR::not_in_gamma_range &e)
+    {
+        cout << "Error: gamma input is not in the range of gamma values used in the fitting mechanism." << endl;
+    }
 
     /* Now that we know the fitting mechanism works, we can fit the model to real data in order 
     to estimate R0 and gamma for the epidemic wave */
