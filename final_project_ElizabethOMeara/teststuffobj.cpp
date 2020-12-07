@@ -9,6 +9,8 @@
 #include <ctime>
 #include "teststuffobj.hpp"
 
+//g++ teststuffobj.cpp -Wall -Wextra -Wpedantic use to check for errors
+
 using namespace std;
 
 int main()
