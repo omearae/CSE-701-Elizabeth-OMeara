@@ -38,6 +38,7 @@ vector<double> operator-(const vector<double> &vec1, const vector<double> &vec2)
     return vec3;
 }
 
+/* Overloading the * operator for two vector<double> to evaluate the element-wise multiplication instead of dot product */
 vector<double> operator*(const vector<double> &vec1, const vector<double> &vec2)
 {
     size_t s{vec1.size()};
@@ -53,6 +54,7 @@ vector<double> operator*(const vector<double> &vec1, const vector<double> &vec2)
     return vec3;
 }
 
+/* Writing my own sum function as the usual one does not add in the final element */
 double sum(vector<double> vec)
 {
     size_t s{vec.size()};
@@ -66,6 +68,7 @@ double sum(vector<double> vec)
     return sum_of_vector;
 }
 
+/* Writing my own minimum function as the usual one was not working for me */
 double my_min(vector<double> vec)
 {
     size_t s{vec.size()};
@@ -86,6 +89,7 @@ double my_min(vector<double> vec)
     return min;
 }
 
+/* Creating classes and a member functions to read a file containing data and return a vector or value */
 class read_report
 {
     string fileName;
@@ -102,7 +106,6 @@ public:
 vector<double> read_report::getData()
 {
     ifstream file(fileName);
-
     vector<double> dataList;
     double test;
 
@@ -141,6 +144,7 @@ double read_population::getData()
     return valuePop;
 }
 
+/* Creating a class and member function that solves the SIR model using the RK4 method given parameter inputs */
 class solve_SIR
 {
 public:
@@ -183,6 +187,8 @@ vector<double> solve_SIR::getSolve()
     return Inew;
 }
 
+/* Creating a class and member function that search through 550 x 900 (R0, gamma) 
+pairs in order to find the best fit by finding the minimum least squares statistic of all simulations. */
 class fit_param
 {
 public:
@@ -200,29 +206,32 @@ private:
 
 vector<double> fit_param::getParam()
 {
-    vector<double> reproduction_estimates(500), gamma_estimates(450);
+    /* Here the range of R0s and gammas that the program should search through to find the best fit is created */
+    vector<double> reproduction_estimates(550), gamma_estimates(900);
     double step_size_reproduction{0.01}, reproduction_start{1}, step_size_gamma{0.001}, gamma_start{0.05};
 
     reproduction_estimates[0] = reproduction_start;
     gamma_estimates[0] = gamma_start;
 
-    for (int i = 0; i < 500 - 1; i++)
+    for (int i = 0; i < 550 - 1; i++)
     {
         reproduction_estimates[i + 1] = reproduction_estimates[i] + step_size_reproduction;
     }
 
-    for (int j = 0; j < 450 - 1; j++)
+    for (int j = 0; j < 900 - 1; j++)
     {
         gamma_estimates[j + 1] = gamma_estimates[j] + step_size_gamma;
     }
 
-    vector<vector<double>> LS_statistic(500, vector<double>(450));
+    /* With the parameter ranges, the SIR model is solved for each pair and then the Least Squares Statistic 
+    between the result and the real data is calculated for each pair. */
+    vector<vector<double>> LS_statistic(550, vector<double>(900));
     double I_init{1};
     vector<double> difference(report_length), difference_squared(report_length);
 
-    for (int i = 0; i < 500; i++)
+    for (int i = 0; i < 550; i++)
     {
-        for (int j = 0; j < 450; j++)
+        for (int j = 0; j < 900; j++)
         {
             solve_SIR solve(popsize, I_init, reproduction_estimates[i], gamma_estimates[j], report_length);
             vector<double> reports_estimated(solve.getSolve());
@@ -247,10 +256,12 @@ vector<double> fit_param::getParam()
             (LS_statistic[i])[j] = sum(difference_squared);
         }
     }
-    vector<double> min_each_column(500);
+
+    /* Once the least squares statistics are estimated, the minimum is found below.  */
+    vector<double> min_each_column(550);
     double min_LS;
 
-    for (int m = 0; m < 500; m++)
+    for (int m = 0; m < 550; m++)
     {
         min_each_column[m] = my_min(LS_statistic[m]);
     }
@@ -259,9 +270,10 @@ vector<double> fit_param::getParam()
 
     int min_r_location, min_gamma_location;
 
-    for (int h = 0; h < 500 - 1; h++)
+    /* Now the location at which the minimum exists is found in order to determine the best fit parameters */
+    for (int h = 0; h < 550 - 1; h++)
     {
-        for (int l = 0; l < 450 - 1; l++)
+        for (int l = 0; l < 900 - 1; l++)
         {
             if ((LS_statistic[h])[l] == min_LS)
             {

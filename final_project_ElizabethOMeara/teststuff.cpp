@@ -6,6 +6,7 @@
 #include <algorithm>
 #include <numeric>
 #include <cmath>
+#include <ctime>
 
 using namespace std;
 
@@ -88,6 +89,7 @@ double my_min(vector<double> vec)
 
 int main()
 {
+    clock_t tStart = clock();
     double N{1700000}, I0{1}, reproductionnumber{2.4}, gamma{0.25};
     int totaltime{122};
     vector<double> Snew(totaltime), Inew(totaltime), Rnew(totaltime);
@@ -114,29 +116,29 @@ int main()
         Rnew[i + 1] = N - Snew[i + 1] - Inew[i + 1];
     }
 
-    vector<double> reproduction_estimates(500), gamma_estimates(450);
+    vector<double> reproduction_estimates(550), gamma_estimates(900);
     double step_size_reproduction{0.01}, reproduction_start{1}, step_size_gamma{0.001}, gamma_start{0.05};
 
     reproduction_estimates[0] = reproduction_start;
     gamma_estimates[0] = gamma_start;
 
-    for (int i = 0; i < 500 - 1; i++)
+    for (int i = 0; i < 550 - 1; i++)
     {
         reproduction_estimates[i + 1] = reproduction_estimates[i] + step_size_reproduction;
     }
 
-    for (int j = 0; j < 450 - 1; j++)
+    for (int j = 0; j < 900 - 1; j++)
     {
         gamma_estimates[j + 1] = gamma_estimates[j] + step_size_gamma;
     }
 
-    vector<vector<double>> LS_statistic(500, vector<double>(450));
+    vector<vector<double>> LS_statistic(550, vector<double>(900));
     double I_init{1};
     vector<double> difference(totaltime + 1), difference_squared(totaltime + 1);
 
-    for (int i = 0; i < 500; i++)
+    for (int i = 0; i < 550; i++)
     {
-        for (int j = 0; j < 450; j++)
+        for (int j = 0; j < 900; j++)
         {
             double N1{1700000}, I01{1}, reproductionnumber1{reproduction_estimates[i]}, gamma1{gamma_estimates[j]};
             int totaltime1{122};
@@ -184,10 +186,10 @@ int main()
             (LS_statistic[i])[j] = sum(difference_squared);
         }
     }
-    vector<double> min_each_column(500);
+    vector<double> min_each_column(550);
     double min_LS;
 
-    for (int m = 0; m < 500; m++)
+    for (int m = 0; m < 550; m++)
     {
         min_each_column[m] = my_min(LS_statistic[m]);
     }
@@ -196,9 +198,9 @@ int main()
 
     int min_r_location, min_gamma_location;
 
-    for (int h = 0; h < 500 - 1; h++)
+    for (int h = 0; h < 550 - 1; h++)
     {
-        for (int l = 0; l < 450 - 1; l++)
+        for (int l = 0; l < 900 - 1; l++)
         {
             if ((LS_statistic[h])[l] == min_LS)
             {
@@ -213,5 +215,7 @@ int main()
     fitted_params[0] = reproduction_estimates[min_r_location];
     fitted_params[1] = gamma_estimates[min_gamma_location];
 
-    cout << fitted_params << endl;
+    cout << "Initial R0 is " << reproductionnumber << " and inital gamma is " << gamma << endl;
+    cout << "The fitted parameters (R0, gamma) are " << fitted_params << endl;
+    cout << "Time taken: " << (double)(clock() - tStart) / CLOCKS_PER_SEC << "s" << endl;
 }
