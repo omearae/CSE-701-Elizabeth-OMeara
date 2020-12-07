@@ -68,27 +68,6 @@ double sum(vector<double> vec)
     return sum_of_vector;
 }
 
-/* Writing my own minimum function as the usual one was not working for me */
-double my_min(vector<double> vec)
-{
-    size_t s{vec.size()};
-    double min;
-    double min_temp{vec[0]};
-    for (size_t i = 0; i < s - 1; i++)
-    {
-        if (min_temp < vec[i + 1])
-        {
-            min_temp = min_temp;
-        }
-        else
-        {
-            min_temp = vec[i + 1];
-        }
-        min = min_temp;
-    }
-    return min;
-}
-
 /* Creating classes and a member functions to read a file containing data and return a vector or value */
 class read_report
 {
@@ -314,10 +293,10 @@ vector<double> fit_param::getParam()
 
     for (int m = 0; m < 550; m++)
     {
-        min_each_column[m] = my_min(LS_statistic[m]);
+        min_each_column[m] = *min_element(LS_statistic[m].begin(), LS_statistic[m].end());
     }
 
-    min_LS = my_min(min_each_column);
+    min_LS = *min_element(min_each_column.begin(), min_each_column.end());
 
     int min_r_location, min_gamma_location;
 
