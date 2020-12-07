@@ -86,77 +86,10 @@ double my_min(vector<double> vec)
     return min;
 }
 
-class read_report
+int main()
 {
-    string fileName;
-
-public:
-    read_report(string filename) : fileName(filename)
-
-    {
-    }
-
-    vector<double> getData();
-};
-
-vector<double> read_report::getData()
-{
-    ifstream file(fileName);
-
-    vector<double> dataList;
-    double test;
-
-    while (file >> test)
-    {
-        dataList.push_back(test);
-    }
-    file.close();
-
-    return dataList;
-}
-
-class read_population
-{
-
-public:
-    read_population(string filenamePop) : fileNamePop(filenamePop)
-
-    {
-    }
-    double getData();
-
-private:
-    string fileNamePop;
-};
-
-double read_population::getData()
-{
-    ifstream filePop;
-
-    filePop.open(fileNamePop);
-
-    double valuePop;
-    filePop >> valuePop;
-    filePop.close();
-    return valuePop;
-}
-
-class solve_SIR
-{
-public:
-    solve_SIR(double input_N, double &input_I0, double &input_reproductionnumber, double &input_gamma, int input_totaltime)
-        : N{input_N}, I0{input_I0}, reproductionnumber{input_reproductionnumber}, gamma{input_gamma}, totaltime{input_totaltime}
-    {
-    }
-    vector<double> getSolve();
-
-private:
-    double N, I0, reproductionnumber, gamma;
-    int totaltime;
-};
-
-vector<double> solve_SIR::getSolve()
-{
+    double N{1700000}, I0{1}, reproductionnumber{2.4}, gamma{0.25};
+    int totaltime{122};
     vector<double> Snew(totaltime), Inew(totaltime), Rnew(totaltime);
     Snew[0] = N - I0;
     Inew[0] = I0;
@@ -180,26 +113,7 @@ vector<double> solve_SIR::getSolve()
         Inew[i + 1] = Inew[i] + ((k1[1] + 2 * k2[1] + 2 * k3[1] + k4[1]) / 6);
         Rnew[i + 1] = N - Snew[i + 1] - Inew[i + 1];
     }
-    return Inew;
-}
 
-class fit_param
-{
-public:
-    fit_param(vector<double> &input_reports, double input_popsize, int input_reportlength)
-        : reports{input_reports}, popsize{input_popsize}, report_length{input_reportlength}
-    {
-    }
-    vector<double> getParam();
-
-private:
-    vector<double> reports;
-    double popsize;
-    int report_length;
-};
-
-vector<double> fit_param::getParam()
-{
     vector<double> reproduction_estimates(500), gamma_estimates(450);
     double step_size_reproduction{0.01}, reproduction_start{1}, step_size_gamma{0.001}, gamma_start{0.05};
 
@@ -218,18 +132,41 @@ vector<double> fit_param::getParam()
 
     vector<vector<double>> LS_statistic(500, vector<double>(450));
     double I_init{1};
-    vector<double> difference(report_length), difference_squared(report_length);
+    vector<double> difference(totaltime + 1), difference_squared(totaltime + 1);
 
     for (int i = 0; i < 500; i++)
     {
         for (int j = 0; j < 450; j++)
         {
-            solve_SIR solve(popsize, I_init, reproduction_estimates[i], gamma_estimates[j], report_length);
-            vector<double> reports_estimated(solve.getSolve());
+            double N1{1700000}, I01{1}, reproductionnumber1{reproduction_estimates[i]}, gamma1{gamma_estimates[j]};
+            int totaltime1{122};
+            vector<double> Snew1(totaltime), Inew1(totaltime), Rnew1(totaltime);
+            Snew1[0] = N1 - I01;
+            Inew1[0] = I01;
+            Rnew1[0] = 0;
+            vector<double> k11(2), k21(2), k31(2), k41(2);
+            for (int i = 0; i < totaltime1 - 1; i++)
+            {
+                k11[0] = -reproductionnumber1 * gamma1 * Snew1[i] * Inew1[i] / N1;
+                k11[1] = (reproductionnumber1 * gamma1 * Snew1[i] * Inew1[i] / N1) - gamma1 * Inew1[i];
+
+                k21[0] = (-reproductionnumber1 * gamma1 / N) * (Snew1[i] + k11[0] / 2) * (Inew1[i] + k11[1] / 2);
+                k21[1] = ((reproductionnumber1 * gamma1 / N) * (Snew1[i] + k11[0] / 2) * (Inew1[i] + k11[1] / 2)) - gamma1 * (Inew1[i] + k11[1] / 2);
+
+                k31[0] = (-reproductionnumber1 * gamma1 / N) * (Snew1[i] + k21[0] / 2) * (Inew1[i] + k21[1] / 2);
+                k31[1] = ((reproductionnumber1 * gamma1 / N) * (Snew1[i] + k21[0] / 2) * (Inew1[i] + k21[1] / 2)) - gamma1 * (Inew1[i] + k21[1] / 2);
+
+                k41[0] = (-reproductionnumber1 * gamma1 / N) * (Snew1[i] + k31[0]) * (Inew1[i] + k31[1]);
+                k41[1] = ((reproductionnumber1 * gamma1 / N) * (Snew1[i] + k31[0]) * (Inew1[i] + k31[1])) - gamma1 * (Inew1[i] + k31[1]);
+
+                Snew1[i + 1] = Snew1[i] + ((k11[0] + 2 * k21[0] + 2 * k31[0] + k41[0]) / 6);
+                Inew1[i + 1] = Inew1[i] + ((k11[1] + 2 * k21[1] + 2 * k31[1] + k41[1]) / 6);
+                Rnew1[i + 1] = N1 - Snew1[i + 1] - Inew1[i + 1];
+            }
 
             try
             {
-                difference = reports - reports_estimated;
+                difference = Inew - Inew1;
             }
             catch (const size_must_match &e)
             {
@@ -276,5 +213,5 @@ vector<double> fit_param::getParam()
     fitted_params[0] = reproduction_estimates[min_r_location];
     fitted_params[1] = gamma_estimates[min_gamma_location];
 
-    return fitted_params;
+    cout << fitted_params << endl;
 }

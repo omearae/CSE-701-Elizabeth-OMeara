@@ -1,0 +1,15 @@
+
+
+solve_SIR test_solve(params_test[0], params_test[1], params_test[2], params_test[3], params_test[4]);
+vector<double> reports_test{test_solve.getSolve()};
+
+fit_param test_fit(reports_test, params_test[0], params_test[4]);
+vector<double> fitted_params_test{test_fit.getParam()};
+
+vector<double> a{1, 2, 3};
+vector<double> c{0, 0, 0};
+vector<double> b(3);
+vector<double> d{4, 2, 3};
+
+cout << "The initial parameters are: R_0 = " << params_test[2] << " and gamma = " << params_test[3] << endl;
+cout << "The fitted parameters are: R_0 = " << fitted_params_test[0] << " and gamma = " << fitted_params_test[1] << endl;
