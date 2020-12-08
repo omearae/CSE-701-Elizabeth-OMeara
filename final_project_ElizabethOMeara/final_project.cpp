@@ -21,7 +21,9 @@ int main()
         /* Here I use the class read_report to retrieve parameters from a .txt file. These are then used to simulate an epidemic
         using the class solve_SIR with the given parameters. */
         read_report parameter_test("params.txt");
-        vector<double> params_test{parameter_test.getData()};
+        vector<double> params_test;
+        params_test = parameter_test.getData();
+
         solve_SIR test_solve(params_test[0], params_test[1], params_test[2], params_test[3], params_test[4]);
         vector<double> reports_test{test_solve.getSolve()};
 
@@ -35,18 +37,22 @@ int main()
     catch (const solve_SIR::param_non_positive &e)
     {
         cout << "Error: Parameter inputs have one or more negative values." << endl;
+        return -1;
     }
     catch (const solve_SIR::no_epidemic &e)
     {
         cout << "Error: R0 input will result in no epidemic." << endl;
+        return -1;
     }
     catch (const solve_SIR::not_in_R0_range &e)
     {
         cout << "Error: R0 input is not in the range of R0 used in the fitting mechanism." << endl;
+        return -1;
     }
     catch (const solve_SIR::not_in_gamma_range &e)
     {
         cout << "Error: gamma input is not in the range of gamma values used in the fitting mechanism." << endl;
+        return -1;
     }
 
     /* Now that we know the fitting mechanism works, we can fit the model to real data in order 
@@ -63,7 +69,7 @@ int main()
     {
         if (real_reports[i] == real_reports.back())
         {
-            Timelength = i;
+            Timelength = i + 1;
             break;
         }
     }

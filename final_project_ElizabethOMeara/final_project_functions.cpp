@@ -6,81 +6,9 @@
 #include <algorithm>
 #include <numeric>
 #include <cmath>
+#include "final_project.hpp"
 
 using namespace std;
-
-class size_must_match
-{
-};
-
-ostream &operator<<(ostream &out, const vector<double> &v)
-{
-    size_t s{v.size() - 1};
-    out << "(";
-    for (size_t i{0}; i < s; i++)
-        out << v[i] << ", ";
-    out << v[s] << ")\n";
-    return out;
-}
-
-vector<double> operator-(const vector<double> &vec1, const vector<double> &vec2)
-{
-    size_t s{vec1.size()};
-    vector<double> vec3(s, 0);
-    if (s != vec2.size())
-    {
-        throw size_must_match{};
-    }
-    for (size_t i{0}; i < s; i++)
-    {
-        vec3[i] = abs(vec1[i] - vec2[i]);
-    }
-    return vec3;
-}
-
-/* Overloading the * operator for two vector<double> to evaluate the element-wise multiplication instead of dot product */
-vector<double> operator*(const vector<double> &vec1, const vector<double> &vec2)
-{
-    size_t s{vec1.size()};
-    vector<double> vec3(s, 0);
-    if (s != vec2.size())
-    {
-        throw size_must_match{};
-    }
-    for (size_t i{0}; i < s; i++)
-    {
-        vec3[i] = vec1[i] * vec2[i];
-    }
-    return vec3;
-}
-
-/* Writing my own sum function as the usual one does not add in the final element */
-double sum(vector<double> vec)
-{
-    size_t s{vec.size()};
-    double sum_of_vector;
-    double sum_init{vec[0]};
-    for (size_t i = 0; i < s - 1; i++)
-    {
-        sum_of_vector = sum_init + vec[i + 1];
-        sum_init = sum_of_vector;
-    }
-    return sum_of_vector;
-}
-
-/* Creating classes and a member functions to read a file containing data and return a vector or value */
-class read_report
-{
-    string fileName;
-
-public:
-    read_report(string filename) : fileName(filename)
-
-    {
-    }
-
-    vector<double> getData();
-};
 
 vector<double> read_report::getData()
 {
@@ -97,20 +25,6 @@ vector<double> read_report::getData()
     return dataList;
 }
 
-class read_population
-{
-
-public:
-    read_population(string filenamePop) : fileNamePop(filenamePop)
-
-    {
-    }
-    double getData();
-
-private:
-    string fileNamePop;
-};
-
 double read_population::getData()
 {
     ifstream filePop;
@@ -122,37 +36,6 @@ double read_population::getData()
     filePop.close();
     return valuePop;
 }
-
-/* Creating a class and member function that solves the SIR model using the RK4 method given parameter inputs */
-class solve_SIR
-{
-public:
-    solve_SIR(double input_N, double &input_I0, double &input_reproductionnumber, double &input_gamma, int input_totaltime)
-        : N{input_N}, I0{input_I0}, reproductionnumber{input_reproductionnumber}, gamma{input_gamma}, totaltime{input_totaltime}
-    {
-    }
-    vector<double> getSolve();
-
-    class param_non_positive
-    {
-    };
-
-    class no_epidemic
-    {
-    };
-
-    class not_in_R0_range
-    {
-    };
-
-    class not_in_gamma_range
-    {
-    };
-
-private:
-    double N, I0, reproductionnumber, gamma;
-    int totaltime;
-};
 
 vector<double> solve_SIR::getSolve()
 {
@@ -216,23 +99,6 @@ vector<double> solve_SIR::getSolve()
     }
     return Inew;
 }
-
-/* Creating a class and member function that search through 550 x 900 (R0, gamma) 
-pairs in order to find the best fit by finding the minimum least squares statistic of all simulations. */
-class fit_param
-{
-public:
-    fit_param(vector<double> &input_reports, double input_popsize, int input_reportlength)
-        : reports{input_reports}, popsize{input_popsize}, report_length{input_reportlength}
-    {
-    }
-    vector<double> getParam();
-
-private:
-    vector<double> reports;
-    double popsize;
-    int report_length;
-};
 
 vector<double> fit_param::getParam()
 {
