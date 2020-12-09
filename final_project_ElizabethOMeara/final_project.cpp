@@ -7,7 +7,7 @@
 #include <numeric>
 #include <ctime>
 #include <cmath>
-#include "final_project.hpp"
+#include "final_project_functions.hpp"
 
 //g++ final_project.cpp -Wall -Wextra -Wpedantic use to check for errors
 using namespace std;
@@ -23,8 +23,6 @@ int main()
         read_report parameter_test("params.txt");
         vector<double> params_test;
         params_test = parameter_test.getData();
-
-        cout << params_test << endl;
 
         solve_SIR test_solve(params_test[0], params_test[1], params_test[2], params_test[3], params_test[4]);
         vector<double> reports_test{test_solve.getSolve()};

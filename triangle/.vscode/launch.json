@@ -8,7 +8,7 @@
             "name": "g++.exe - Build and debug active file",
             "type": "cppdbg",
             "request": "launch",
-            "program": "${workspaceFolder}\\final_project_functions.exe",
+            "program": "${workspaceFolder}\\triangle.exe",
             "args": [],
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}",

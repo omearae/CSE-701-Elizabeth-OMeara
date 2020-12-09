@@ -9,12 +9,11 @@
 				"-g",
 				"${workspaceFolder}\\*.cpp",
 				"-o",
-				"${workspaceFolder}\\final_project_functions.exe",
+				"${workspaceFolder}\\triangle.exe",
 				"-Wall",
 				"-Wextra",
 				"-Wpedantic",
-				"-std=c++17",
-				"-D __USE_MINGW_ANSI_STDIO=1"
+				"-std=c++17"
 			],
 			"options": {
 				"cwd": "${workspaceFolder}"
