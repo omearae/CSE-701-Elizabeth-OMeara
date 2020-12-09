@@ -17,7 +17,7 @@
 				"-D __USE_MINGW_ANSI_STDIO=1"
 			],
 			"options": {
-				"cwd": "C:/msys64/mingw64/bin"
+				"cwd": "${workspaceFolder}"
 			},
 			"problemMatcher": [
 				"$gcc"

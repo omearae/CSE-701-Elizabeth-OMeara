@@ -24,6 +24,8 @@ int main()
         vector<double> params_test;
         params_test = parameter_test.getData();
 
+        cout << params_test << endl;
+
         solve_SIR test_solve(params_test[0], params_test[1], params_test[2], params_test[3], params_test[4]);
         vector<double> reports_test{test_solve.getSolve()};
 
@@ -58,7 +60,7 @@ int main()
     /* Now that we know the fitting mechanism works, we can fit the model to real data in order 
     to estimate R0 and gamma for the epidemic wave */
 
-    read_report read_data("data.txt");
+    read_report read_data("covid_data.txt");
     vector<double> real_reports{read_data.getData()};
 
     /* Since we need to know how long we want to run the simulations for ie. same length as the given data, 
@@ -70,12 +72,11 @@ int main()
         if (real_reports[i] == real_reports.back())
         {
             Timelength = i + 1;
-            break;
         }
     }
 
     /* Here we are getting the given population size for the epidemic from another file */
-    read_population pop("population.txt");
+    read_population pop("ontario_pop_size.txt");
     double pop_size{pop.getData()};
 
     /* Now that we have all the required data, we call fit_param to fit a model to the given data */
@@ -83,6 +84,7 @@ int main()
     vector<double> fitted_epidemic_params{epidemic_fit.getParam()};
 
     cout << "The fitted parameters for the given epidemic wave are R0 = " << fitted_epidemic_params[0] << " and gamma = " << fitted_epidemic_params[1] << endl;
+
     cout << "Time taken: " << (double)(clock() - tStart) / CLOCKS_PER_SEC << "s" << endl;
 
     return 0;

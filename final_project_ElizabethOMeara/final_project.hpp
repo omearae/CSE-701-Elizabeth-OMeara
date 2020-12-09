@@ -84,7 +84,12 @@ public:
 
 vector<double> read_report::getData()
 {
-    ifstream file(fileName);
+    ifstream file{fileName};
+    if (!file)
+    {
+        perror("Error opening input file");
+    }
+
     vector<double> dataList;
     double test;
 
@@ -238,7 +243,7 @@ vector<double> fit_param::getParam()
 {
     /* Here the range of R0s and gammas that the program should search through to find the best fit is created */
     vector<double> reproduction_estimates(550), gamma_estimates(900);
-    double step_size_reproduction{0.01}, reproduction_start{1}, step_size_gamma{0.001}, gamma_start{0.05};
+    double step_size_reproduction{0.01}, reproduction_start{1.01}, step_size_gamma{0.001}, gamma_start{0.05};
 
     reproduction_estimates[0] = reproduction_start;
     gamma_estimates[0] = gamma_start;
@@ -257,14 +262,13 @@ vector<double> fit_param::getParam()
     between the result and the real data is calculated for each pair. */
     vector<vector<double>> LS_statistic(550, vector<double>(900));
     double I_init{1};
-    vector<double> difference(report_length), difference_squared(report_length);
+    vector<double> difference(report_length), difference_squared(report_length), reports_estimated(report_length);
 
     for (int i = 0; i < 550; i++)
     {
         for (int j = 0; j < 900; j++)
         {
             solve_SIR solve(popsize, I_init, reproduction_estimates[i], gamma_estimates[j], report_length);
-            vector<double> reports_estimated(report_length);
 
             reports_estimated = solve.getSolve();
 
