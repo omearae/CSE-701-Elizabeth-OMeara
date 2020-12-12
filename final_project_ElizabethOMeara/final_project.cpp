@@ -9,7 +9,6 @@
 #include <cmath>
 #include "final_project_functions.hpp"
 
-//g++ final_project.cpp -Wall -Wextra -Wpedantic use to check for errors
 using namespace std;
 
 int main()
@@ -63,7 +62,7 @@ int main()
     vector<double> real_reports{read_data.getData()};
 
     /* Since we need to know how long we want to run the simulations for ie. same length as the given data, 
-    we need to define Timelength to be the size of real_reports */
+    we need to define Timelength to be the size of real_reports, this is done using the class get_timelength */
 
     get_timelength length_of_reports(real_reports);
     int Timelength{length_of_reports.getLength()};
