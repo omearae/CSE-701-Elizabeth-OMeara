@@ -15,12 +15,13 @@ using namespace std;
 int main()
 {
     clock_t tStart = clock();
+    cout << "Testing the fitting mechanism given sample parameter input" << endl;
     /* First we check to make sure the fitting mechanism works by fitting to simulated data where we know the parameters */
     try
     {
         /* Here I use the class read_report to retrieve parameters from a .txt file. These are then used to simulate an epidemic
         using the class solve_SIR with the given parameters. */
-        read_report parameter_test("params.txt");
+        read_report parameter_test("params_invalid.txt");
         vector<double> params_test;
         params_test = parameter_test.getData();
 
@@ -74,7 +75,8 @@ int main()
     /* Now that we have all the required data, we call fit_param to fit a model to the given data */
     fit_param epidemic_fit(real_reports, pop_size, Timelength);
     vector<double> fitted_epidemic_params{epidemic_fit.getParam()};
-
+    cout << " " << endl;
+    cout << "Fitting the SIR model to the provided epidemic wave" << endl;
     cout << "The fitted parameters for the given epidemic wave are R0 = " << fitted_epidemic_params[0] << " and gamma = " << fitted_epidemic_params[1] << endl;
 
     cout << "Time taken: " << (double)(clock() - tStart) / CLOCKS_PER_SEC << "s" << endl;

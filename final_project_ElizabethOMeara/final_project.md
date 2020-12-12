@@ -402,6 +402,22 @@ vector<double> fit_param::getParam()
 
 ### Output when given valid parameter inputs
 
+This sample output was generated given a .txt file that contains 1918 Flu data for a wave in Philadelphia (data.txt), a .txt file that contains the population of Philadelphia in 1918 (population.txt) and a .txt file that contains sample parameters to test the fitting mechanism (params.txt). These sample files can be found in the same folder where this documentation exists.
+
+First, we test the fitting mechanism using the params.txt input, where the parameter values in params.txt are valid (positive and R0 and gamma exist in the range defined in `fit_params::getParam()`). Then the other two .txt files are used to estimate `R0` and `gamma` for the 1918 flu in Philadelphia for the given wave. This results in the following output.
+
+![Output with valid parameters](valid_params.jpg)
+
 ### Output when given invalid parameter inputs
 
+This sample output was generated using the file params_invalid.txt. Here the value of `R0` is set to 0.5. This is invalid as it will not result in an epidemic. The output of this program can be seen below.
+
+![Output with valid parameters](invalid_params.jpg)
+
 ## Use of Debugging in this Project
+
+In addition to the required concepts used in this program, debugging was also necessary. Before the final version of the code was complete, it resulted in several segmentation faults. Segmentation faults can be caused by many different issues. So in order to determine what was causing the fault, I used debugging. This was accomplished by adding an argument to the `"args":` section in tasks.json. Specifically, I got rid of `"-g"` and added `"-ggdb3"`. Once I was done debugging this was changed back to `"-g"`. I assigned breakpoints to different points in the code so that at each step I could use the variables window in the debugging area of VScode.
+
+The first segmentation fault was because I was trying to access .txt files that were not in the programs working directory. I discovered this because at the breakpoint after `read_report::getData()` was called, in the variables section, the vector that should contain the information from the .txt file had no elements. This lead believe that the fault was caused becuase the program was trying to access a .txt file that it was not authorized to. This happens when the .txt file is not in the working directory of the program. However, this was strange becuase the .txt file was in the same workspace folder as the final_project.cpp file. To fix this issue I needed to check what working directory was defined. The working directory can be found in tasks.json in the `"options":` section beside `"cwd":`. By changing this to the workspace folder, ie. change it to `"cwd":"${workspaceFolder}"`, this segmentation fault was fixed.
+
+The second segmentation fault was because `min_r_location` in `fit_param::getParam()` was `6828360` when the length of the `reproductionestimates` vector was 900 at the time. Using the debugger helped me determine why this was occuring. By once again putting a breakpoint after the calculation of `LS_statistic`, I could tell that before `min_r_location` was calculated, the vector of vectors of doubles or matrix `LS_statistic` had values of NAN after approximately 563 `R0` estimates and after approximately 900 `gamma` estiamtes. So when the function `*min_element` was called, the value was NAN, which resulted in a min_r_location being out of bounds. I was able to fix this issue by changing the range of `R0` values to include 550 `R0` estimates and 900 `gamma` estimates. This then got rid of the segmentation fault and the program ran smoothly afterwards.
