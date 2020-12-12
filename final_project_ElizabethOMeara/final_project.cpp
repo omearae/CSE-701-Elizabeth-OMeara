@@ -63,15 +63,9 @@ int main()
 
     /* Since we need to know how long we want to run the simulations for ie. same length as the given data, 
     we need to define Timelength to be the size of real_reports */
-    int Timelength;
 
-    for (size_t i = 0; i < real_reports.size(); i++)
-    {
-        if (real_reports[i] == real_reports.back())
-        {
-            Timelength = i + 1;
-        }
-    }
+    get_timelength length_of_reports(real_reports);
+    int Timelength{length_of_reports.getLength()};
 
     /* Here we are getting the given population size for the epidemic from another file */
     read_population pop("ontario_pop_size.txt");

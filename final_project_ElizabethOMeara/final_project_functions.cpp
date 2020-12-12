@@ -85,6 +85,21 @@ vector<double> read_report::getData()
     return dataList;
 }
 
+int get_timelength::getLength()
+{
+    int length_of_time;
+
+    for (size_t i = 0; i < Data.size(); i++)
+    {
+        if (Data[i] == Data.back())
+        {
+            length_of_time = i + 1;
+        }
+    }
+
+    return length_of_time;
+}
+
 double read_population::getData()
 {
     ifstream filePop;

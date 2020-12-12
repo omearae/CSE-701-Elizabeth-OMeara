@@ -20,6 +20,19 @@ public:
     vector<double> getData();
 };
 
+class get_timelength
+{
+public:
+    get_timelength(vector<double> data) : Data(data)
+    {
+    }
+
+    int getLength();
+
+private:
+    vector<double> Data;
+};
+
 class read_population
 {
 
