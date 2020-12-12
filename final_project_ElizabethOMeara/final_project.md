@@ -311,7 +311,7 @@ private:
 
 The associated member function `getParam()` first creates vectors containing the potential `R0` and `gamma` values. These are the estimates that the program will search through pairs of to find the best fit. To do so, for each value of `R0` a for loop iterates through the potential values of `gamma`. In this for loop the class `solve_SIR` is called with the given inputs and specified values of `R0` and `gamma`. Its associated member function `getSolve()` is then used to created a vector of estimated reports. This will then be used with the actual report input to calculate a value of the Least Squares (LS) statistic and outputs it as an entry in a 550x900 matrix. The above is iterated until each pair of `R0` and `gamma` results in a LS statistic.
 
-Once there is a matrix containing values of the LS statistic for each pair of parameter estimates, `getParam()` finds the minmum value in the matrix and finds the `R0` and `gamma` values at which this occurs. Finally, the `R0` and `gamma` values that result in the best fit to the data are returned. The code for `getParam()` can be seen below.
+Once there is a matrix containing values of the LS statistic for each pair of parameter estimates, `getParam()` finds the minmum value in the matrix using the function `min_element` as defined by the algorithm library and finds the `R0` and `gamma` values at which this occurs. Finally, the `R0` and `gamma` values that result in the best fit to the data are returned. The code for `getParam()` can be seen below.
 
 ``` cpp
 vector<double> fit_param::getParam()
