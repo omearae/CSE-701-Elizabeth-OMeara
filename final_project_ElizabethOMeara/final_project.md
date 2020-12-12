@@ -10,9 +10,91 @@ The program uses the RK4 method to solve the SIR model (model used can be seen i
 
 ## Implementation
 
+### Namespace and libraries used in the program
+
+The libraries used in this program can be seen in the code below.
+
+``` cpp
+#include <iostream>
+#include <string>
+#include <fstream>
+#include <vector>
+#include <iterator>
+#include <algorithm>
+#include <numeric>
+#include <cmath>
+```
+
+This program sets the namespace to the standard namespace `std` using the following code.
+
+``` cpp
+using namespace std;
+```
+
+### Operator overloads and user-defined function sum
+
+This program requires operator overloads for vector subtraction and multiplication. In both cases we must throw an exception when the sizes of the two vectors do not match. So first the class `size_must_match` is defined. Then the operator overloads for subtraction and multiplication are defined. The vector subtraction overload is defined as the norm ie. absolute value of the difference. In this overload I use the funciton `abs` as defined by the numerics library to take the absolute value of the difference between two vectors. Vector multiplication is defined as elementwise multiplication rather than the dot product. The code for `size_must_match` and the overloads can be seen below.
+
+``` cpp
+class size_must_match
+{
+};
+```
+
+``` cpp
+vector<double> operator-(const vector<double> &vec1, const vector<double> &vec2)
+{
+    size_t s{vec1.size()};
+    vector<double> vec3(s, 0);
+    if (s != vec2.size())
+    {
+        throw size_must_match{};
+    }
+    for (size_t i{0}; i < s; i++)
+    {
+        vec3[i] = abs(vec1[i] - vec2[i]);
+    }
+    return vec3;
+}
+```
+
+``` cpp
+vector<double> operator*(const vector<double> &vec1, const vector<double> &vec2)
+{
+    size_t s{vec1.size()};
+    vector<double> vec3(s, 0);
+    if (s != vec2.size())
+    {
+        throw size_must_match{};
+    }
+    for (size_t i{0}; i < s; i++)
+    {
+        vec3[i] = vec1[i] * vec2[i];
+    }
+    return vec3;
+}
+```
+
+Next, the user-defined function `sum` is created. This was required as the function `accumulate` as defined by `input <algorithm>` does not result in the correct value as it does not include the final value in the vector. The code for `sum` can be seen below.
+
+``` cpp
+double sum(vector<double> vec)
+{
+    size_t s{vec.size()};
+    double sum_of_vector;
+    double sum_init{vec[0]};
+    for (size_t i = 0; i < s - 1; i++)
+    {
+        sum_of_vector = sum_init + vec[i + 1];
+        sum_init = sum_of_vector;
+    }
+    return sum_of_vector;
+}
+```
+
 ### Reading .txt files to obtain data and parameter input
 
-As this program is intended to be object oriented, the entire program is based on user-defined classes. The first two classes `read_report` and `read_population` take .txt file inputs and contain the member functions `getData()` which is a vector that will output the contents of the .txt files. The code for these classes can be seen below.
+As this program is intended to be object oriented, the entire program is based on user-defined classes. The first two classes `read_report` and `read_population` contain a constructor that take .txt file inputs and the member functions `getData()` which is a vector that will output the contents of the .txt files. The code for these classes can be seen below.
 
 ``` cpp
 class read_report
@@ -43,7 +125,7 @@ private:
 };
 ```
 
-The associated member function for `read_report` opens the .txt file input, reads their contents and outputs them into a vector of doubles. The following code shows the implementation. The associated member function for `read_population` is similar, however it outputs a double since the .txt file only contains the population size.
+The associated member function for `read_report` opens the .txt file input, reads its contents and outputs them into a vector of doubles. The following code shows the implementation. The associated member function for `read_population` is similar, however it outputs a double since the .txt file only contains the population size.
 
 ``` cpp
     vector<double> read_report::getData()
@@ -69,7 +151,7 @@ The associated member function for `read_report` opens the .txt file input, read
 
 ### Creating a class and member function that find the length of the reports vector
 
-The class `get_timelength` takes the input of a vector of doubles containing the epidemic data, ie the output of `read_report::getData()` and contains a member function `getLength()` that finds the length of the vector as an integer value. The code for `get_timelength` and `getLength()` can be seen below.
+The class `get_timelength` contains a constructor that takes the input of a vector of doubles containing the epidemic data, ie. the output of `read_report::getData()` and a member function `getLength()` that finds the length of the vector as an integer value. The code for `get_timelength` and `getLength()` can be seen below.
 
 ``` cpp
 class get_timelength
@@ -105,7 +187,7 @@ int get_timelength::getLength()
 
 ### Creating a class and member function that solve the SIR model
 
-The next class `solve_SIR` takes the input of several parameters and contains a member function `getSolve()` that will solve the SIR model using the RK4 method given the parameter input. The class itself also defines classes that will be used for exceptions in the member function `getSolve()`. The code of the class can be seen below.
+The next class `solve_SIR` contains a constructor that takes the input of several parameters and a member function `getSolve()` that will solve the SIR model using the RK4 method given the parameter input. The class itself also defines classes that will be used for exceptions in the member function `getSolve()`. The code of the class can be seen below.
 
 ``` cpp
 class solve_SIR
@@ -139,7 +221,7 @@ private:
 };
 ```
 
-The associated member function `getSolve()` first defines exceptions to be thrown if the parameter inputs are not valid. Examples will be shown in the Sample Calculation section. If the parameter inputs are valid, `getSolve()` will solve the SIR model using the RK4 method. The code for `getSolve()` can be seen below.
+The associated member function `getSolve()` first defines exceptions to be thrown if the parameter inputs are not valid. Examples of invalid parameter values will be shown in the Sample Calculation section. If the parameter inputs are valid, `getSolve()` will solve the SIR model using the RK4 method. The code for `getSolve()` can be seen below.
 
 ``` cpp
 vector<double> solve_SIR::getSolve()
@@ -208,7 +290,7 @@ vector<double> solve_SIR::getSolve()
 
 ### Creating a class that fits the SIR model to provided epidemic data
 
-The final class used in this program is `fit_param`. This class takes input from a vector containing a wave of epidemic data. This can either be from the member function `read_report::getSolve()` or from `solve_SIR::getSolve()` where the input for `solve_SIR` is from the sample parameter file. It also takes the input for the population size and length of the report vector. It has an associated member function `getParam()` that fits the SIR model to the provided data input. The code for `fit_param` can be seen below.
+The final class used in this program is `fit_param`. This class contains a constructor that takes input from a vector containing a wave of epidemic data. This can either be from the member function `read_report::getSolve()` or from `solve_SIR::getSolve()` where the input for `solve_SIR` is from the sample parameter file. It also takes the input for the population size and length of the report vector. `fit_param` also has an associated member function `getParam()` that fits the SIR model to the provided data input. The code for the class `fit_param` can be seen below.
 
 ``` cpp
 class fit_param
@@ -315,3 +397,11 @@ vector<double> fit_param::getParam()
     return fitted_params;
 }
 ```
+
+## Sample Outputs of the Program
+
+### Output when given valid parameter inputs
+
+### Output when given invalid parameter inputs
+
+## Use of Debugging in this Project
