@@ -21,7 +21,7 @@ int main()
     {
         /* Here I use the class read_report to retrieve parameters from a .txt file. These are then used to simulate an epidemic
         using the class solve_SIR with the given parameters. */
-        read_report parameter_test("params_invalid.txt");
+        read_report parameter_test("params.txt");
         vector<double> params_test;
         params_test = parameter_test.getData();
 
@@ -59,7 +59,7 @@ int main()
     /* Now that we know the fitting mechanism works, we can fit the model to real data in order 
     to estimate R0 and gamma for the epidemic wave */
 
-    read_report read_data("covid_data.txt");
+    read_report read_data("data.txt");
     vector<double> real_reports{read_data.getData()};
 
     /* Since we need to know how long we want to run the simulations for ie. same length as the given data, 
@@ -69,7 +69,7 @@ int main()
     int Timelength{length_of_reports.getLength()};
 
     /* Here we are getting the given population size for the epidemic from another file */
-    read_population pop("ontario_pop_size.txt");
+    read_population pop("population.txt");
     double pop_size{pop.getData()};
 
     /* Now that we have all the required data, we call fit_param to fit a model to the given data */

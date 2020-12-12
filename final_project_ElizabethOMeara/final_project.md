@@ -1,12 +1,12 @@
-# **Final Project: Using C++ to fit the SIR model to a wave of epidemic data**~ Elizabeth O'Meara 400054293 ~ December 12, 2020
+# **Final Project: Using C++ to fit the SIR model to a wave of epidemic data** ~ Elizabeth O'Meara 400054293 ~ December 12, 2020
 
 ## Summary
 
 I created this program to fit a simple SIR model to a wave of epidemic data, and output the parameters `R0` and `gamma` that provide the best fit to the provided data.
 
-The program takes input from three .txt files. One that contains the counts during an epidemic wave, another that provides the population size for the given epidemic data, and the last one contains sample parameters that are required to simulate an epidemic. Taking input of sample parameters is crucial as it allows us to ensure that when we simulate an epidemic with specific parameter values, we will get the same parameters back when we fit the model to the data.
+The program takes input from three .txt files. One that contains the daily new counts during an epidemic wave, another that provides the population size for the given epidemic data, and the last one contains sample parameters that are required to simulate an epidemic. Taking input of sample parameters is crucial as it allows us to ensure that when we simulate an epidemic with specific parameter values, we will get the same parameters back when we fit the model to the simulated data.
 
-The program uses the RK4 method to solve the SIR model (model used can be seen in the code below) and the direct search method to find the pair of `R0` and `gamma` of 550 `R0` values and 900 `gamma` values that result in the minimum Least Squares Statistic, and thus the best fit.
+The program uses the RK4 method to solve the SIR model and the direct search method to find the pair of `R0` and `gamma` of 550 `R0` values and 900 `gamma` values that result in the minimum Least Squares Statistic, and thus the best fit.
 
 ## Implementation
 
@@ -23,6 +23,7 @@ The libraries used in this program can be seen in the code below.
 #include <algorithm>
 #include <numeric>
 #include <cmath>
+#include <ctime>
 ```
 
 This program sets the namespace to the standard namespace `std` using the following code.
@@ -75,7 +76,7 @@ vector<double> operator*(const vector<double> &vec1, const vector<double> &vec2)
 }
 ```
 
-Next, the user-defined function `sum` is created. This was required as the function `accumulate` as defined by `input <algorithm>` does not result in the correct value as it does not include the final value in the vector. The code for `sum` can be seen below.
+Next, the user-defined function `sum` is created. This was required as the function `accumulate` as defined by the library `algorithm` does not result in the correct value as it does not include the final value in the vector. The code for `sum` can be seen below.
 
 ``` cpp
 double sum(vector<double> vec)
@@ -125,7 +126,7 @@ private:
 };
 ```
 
-The associated member function for `read_report` opens the .txt file input, reads its contents and outputs them into a vector of doubles. The following code shows the implementation. The associated member function for `read_population` is similar, however it outputs a double since the .txt file only contains the population size.
+The associated member function for `read_report` opens the .txt file input using `ifstream`, reads its contents and outputs them into a vector of doubles. The following code shows the implementation. The associated member function for `read_population` is similar, however it outputs a double since the .txt file only contains the population size.
 
 ``` cpp
     vector<double> read_report::getData()
@@ -147,11 +148,23 @@ The associated member function for `read_report` opens the .txt file input, read
 
     return dataList;
 }
+
+double read_population::getData()
+{
+    ifstream filePop;
+
+    filePop.open(fileNamePop);
+
+    double valuePop;
+    filePop >> valuePop;
+    filePop.close();
+    return valuePop;
+}
 ```
 
 ### Creating a class and member function that find the length of the reports vector
 
-The class `get_timelength` contains a constructor that takes the input of a vector of doubles containing the epidemic data, ie. the output of `read_report::getData()` and a member function `getLength()` that finds the length of the vector as an integer value. The code for `get_timelength` and `getLength()` can be seen below.
+The class `get_timelength` contains a constructor that takes the input of a vector of doubles containing the epidemic data, ie. the output of `read_report::getData()`, and a member function `getLength()` that finds the length of the vector as an integer value. The code for `get_timelength` and `getLength()` can be seen below.
 
 ``` cpp
 class get_timelength
@@ -309,7 +322,7 @@ private:
 };
 ```
 
-The associated member function `getParam()` first creates vectors containing the potential `R0` and `gamma` values. These are the estimates that the program will search through pairs of to find the best fit. To do so, for each value of `R0` a for loop iterates through the potential values of `gamma`. In this for loop the class `solve_SIR` is called with the given inputs and specified values of `R0` and `gamma`. Its associated member function `getSolve()` is then used to created a vector of estimated reports. This will then be used with the actual report input to calculate a value of the Least Squares (LS) statistic and outputs it as an entry in a 550x900 matrix. The above is iterated until each pair of `R0` and `gamma` results in a LS statistic.
+The associated member function `getParam()` first creates vectors containing the potential `R0` and `gamma` values. These are the estimates that the program will search through pairs of to find the best fit. To do so, for each value of `R0` a for loop iterates through the potential values of `gamma`. In this for loop the class `solve_SIR` is called with the given inputs and specified values of `R0` and `gamma`. Its associated member function `getSolve()` is then used to create a vector of estimated reports. This will then be used with the actual report input to calculate a value of the Least Squares (LS) statistic and outputs it as an entry in a 550x900 matrix. The above is iterated until each pair of `R0` and `gamma` results in a LS statistic.
 
 Once there is a matrix containing values of the LS statistic for each pair of parameter estimates, `getParam()` finds the minmum value in the matrix using the function `min_element` as defined by the algorithm library and finds the `R0` and `gamma` values at which this occurs. Finally, the `R0` and `gamma` values that result in the best fit to the data are returned. The code for `getParam()` can be seen below.
 
@@ -400,13 +413,75 @@ vector<double> fit_param::getParam()
 
 ## Sample Outputs of the Program
 
-### Output when given valid parameter inputs
+### Output when given valid parameter inputs and 1918 Flu Data
 
 This sample output was generated given a .txt file that contains 1918 Flu data for a wave in Philadelphia (data.txt), a .txt file that contains the population of Philadelphia in 1918 (population.txt) and a .txt file that contains sample parameters to test the fitting mechanism (params.txt). These sample files can be found in the same folder where this documentation exists.
 
-First, we test the fitting mechanism using the params.txt input, where the parameter values in params.txt are valid (positive and R0 and gamma exist in the range defined in `fit_params::getParam()`). Then the other two .txt files are used to estimate `R0` and `gamma` for the 1918 flu in Philadelphia for the given wave. This results in the following output.
+First, we test the fitting mechanism using the params.txt input, where the parameter values in params.txt are valid (positive and R0 and gamma exist in the range defined in `fit_params::getParam()`). Then the other two .txt files are used to estimate `R0` and `gamma` for the 1918 flu in Philadelphia for the given wave. This is accomplished with the following code.
 
-![Output with valid parameters](valid_params.jpg)
+``` cpp
+cout << "Testing the fitting mechanism given sample parameter input" << endl;
+    try
+    {
+        read_report parameter_test("params.txt");
+        vector<double> params_test;
+        params_test = parameter_test.getData();
+
+        solve_SIR test_solve(params_test[0], params_test[1], params_test[2], params_test[3], params_test[4]);
+        vector<double> reports_test{test_solve.getSolve()};
+
+        fit_param test_fit(reports_test, params_test[0], params_test[4]);
+        vector<double> fitted_params_test{test_fit.getParam()};
+
+        cout << "The initial parameters are: R_0 = " << params_test[2] << " and gamma = " << params_test[3] << endl;
+        cout << "The fitted parameters are: R_0 = " << fitted_params_test[0] << " and gamma = " << fitted_params_test[1] << endl;
+    }
+    catch (const solve_SIR::param_non_positive &e)
+    {
+        cout << "Error: Parameter inputs have one or more negative values." << endl;
+        return -1;
+    }
+    catch (const solve_SIR::no_epidemic &e)
+    {
+        cout << "Error: R0 input will result in no epidemic." << endl;
+        return -1;
+    }
+    catch (const solve_SIR::not_in_R0_range &e)
+    {
+        cout << "Error: R0 input is not in the range of R0 used in the fitting mechanism." << endl;
+        return -1;
+    }
+    catch (const solve_SIR::not_in_gamma_range &e)
+    {
+        cout << "Error: gamma input is not in the range of gamma values used in the fitting mechanism." << endl;
+        return -1;
+    }
+
+    read_report read_data("data.txt");
+    vector<double> real_reports{read_data.getData()};
+
+    get_timelength length_of_reports(real_reports);
+    int Timelength{length_of_reports.getLength()};
+
+    read_population pop("population.txt");
+    double pop_size{pop.getData()};
+
+    fit_param epidemic_fit(real_reports, pop_size, Timelength);
+    vector<double> fitted_epidemic_params{epidemic_fit.getParam()};
+    cout << " " << endl;
+    cout << "Fitting the SIR model to the provided epidemic wave" << endl;
+    cout << "The fitted parameters for the given epidemic wave are R0 = " << fitted_epidemic_params[0] << " and gamma = " << fitted_epidemic_params[1] << endl;
+```
+
+The following is the output of the program with the inputs as defined above.
+
+![Output with valid parameters 1918 Flu](valid_params_flu.jpg)
+
+### Output when given valid parameter inputs and COVID-19 Data for Ontario's First Wave
+
+The only difference here is that the report data is taken from covid_data.txt and the population data is from ontario_pop_size.txt. This results in the following output.
+
+![Output with valid parameters Covid](valid_params.jpg)
 
 ### Output when given invalid parameter inputs
 
@@ -418,6 +493,6 @@ This sample output was generated using the file params_invalid.txt. Here the val
 
 In addition to the required concepts used in this program, debugging was also necessary. Before the final version of the code was complete, it resulted in several segmentation faults. Segmentation faults can be caused by many different issues. So in order to determine what was causing the fault, I used debugging. This was accomplished by adding an argument to the `"args":` section in tasks.json. Specifically, I got rid of `"-g"` and added `"-ggdb3"`. Once I was done debugging this was changed back to `"-g"`. I assigned breakpoints to different points in the code so that at each step I could use the variables window in the debugging area of VScode.
 
-The first segmentation fault was because I was trying to access .txt files that were not in the programs working directory. I discovered this because at the breakpoint after `read_report::getData()` was called, in the variables section, the vector that should contain the information from the .txt file had no elements. This lead believe that the fault was caused becuase the program was trying to access a .txt file that it was not authorized to. This happens when the .txt file is not in the working directory of the program. However, this was strange becuase the .txt file was in the same workspace folder as the final_project.cpp file. To fix this issue I needed to check what working directory was defined. The working directory can be found in tasks.json in the `"options":` section beside `"cwd":`. By changing this to the workspace folder, ie. change it to `"cwd":"${workspaceFolder}"`, this segmentation fault was fixed.
+The first segmentation fault was because I was trying to access .txt files that were not in the programs working directory. I discovered this because at the breakpoint after `read_report::getData()` was called, in the variables section, the vector that should contain the information from the .txt file had no elements. This lead me to believe that the fault was caused becuase the program was trying to access a .txt file that it was not authorized to. This happens when the .txt file is not in the working directory of the program. However, this was strange becuase the .txt file was in the same workspace folder as the final_project.cpp file. To fix this issue I needed to check what working directory was defined. The working directory can be found in tasks.json in the `"options":` section beside `"cwd":`. By changing this to the workspace folder, ie. change it to `"cwd":"${workspaceFolder}"`, this segmentation fault was fixed as the working directory was changed to the workspace folder (where the .txt files already were).
 
-The second segmentation fault was because `min_r_location` in `fit_param::getParam()` was `6828360` when the length of the `reproductionestimates` vector was 900 at the time. Using the debugger helped me determine why this was occuring. By once again putting a breakpoint after the calculation of `LS_statistic`, I could tell that before `min_r_location` was calculated, the vector of vectors of doubles or matrix `LS_statistic` had values of NAN after approximately 563 `R0` estimates and after approximately 900 `gamma` estiamtes. So when the function `*min_element` was called, the value was NAN, which resulted in a min_r_location being out of bounds. I was able to fix this issue by changing the range of `R0` values to include 550 `R0` estimates and 900 `gamma` estimates. This then got rid of the segmentation fault and the program ran smoothly afterwards.
+The second segmentation fault was because `min_r_location` in `fit_param::getParam()` was `6828360` when the length of the `reproductionestimates` vector was 900 at the time. Using the debugger helped me determine why this was occuring. By putting a breakpoint after the calculation of `LS_statistic`, I could tell that before `min_r_location` was calculated, the vector of vectors of doubles or matrix `LS_statistic` had values of NAN after approximately 563 `R0` estimates and after approximately 900 `gamma` estiamtes. So when the function `*min_element` was called, the value was NAN, which resulted in a min_r_location being out of bounds. I was able to fix this issue by changing the range of `R0` values to include 550 `R0` estimates and 900 `gamma` estimates. This then got rid of the segmentation fault and the program ran smoothly afterwards.
