@@ -1,4 +1,4 @@
-# **Final Project: Using C++ to fit the SIR model to a wave of epidemic data** ~ Elizabeth O'Meara 400054293 ~ December 12, 2020
+# **Final Project: Using C++ to fit the SIR model to a wave of epidemic data** ~ Elizabeth O'Meara ~ December 12, 2020
 
 ## Summary
 
