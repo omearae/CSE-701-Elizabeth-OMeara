@@ -26,7 +26,7 @@ The libraries used in this program can be seen in the code below.
 #include <ctime>
 ```
 
-This program sets the namespace to the standard namespace `std` using the following code.
+This program uses the following code so that any function under the namespace `std` will not require `std::` before it.
 
 ``` cpp
 using namespace std;
