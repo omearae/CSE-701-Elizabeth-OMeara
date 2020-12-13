@@ -1,4 +1,4 @@
-# **Project 2: Using C++ to Simulate Epidemics and Estimate the Corresponding Values of the growth rate, r, and the doubling time, Td.** ~ Elizabeth O'Meara 400054293 ~ November 8, 2020
+# **Project 2: Using C++ to Simulate Epidemics and Estimate the Corresponding Values of the growth rate, r, and the doubling time, Td.** ~ Elizabeth O'Meara ~ November 8, 2020
 
 ## Summary
 
