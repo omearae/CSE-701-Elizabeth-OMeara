@@ -1,4 +1,4 @@
-# **Project 1: Using C to Approximate the Solution of a Differential Equation** <br> Elizabeth O'Meara 400054293 <br> October 10, 2020
+# **Project 1: Using C to Approximate the Solution of a Differential Equation** <br> Elizabeth O'Meara <br> October 10, 2020
 
 ## Summary
 I created this program to approximate the solution of a differential equation using two different methods, the Forward Euler and RK2 method. This program allows you to define the differential equation you wish to approximate and its associated parameters (initial values, value at which the equation should be estimated and how many steps you would like to take to get to the desired x value), and with this inforamtion will have an output providing the approximation.
